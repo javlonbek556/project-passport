@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\PassportUpdateRequest;
 use App\Models\Passport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\PassportStoreRequest;
 use App\Http\Requests\PassportCreateRequest;
+use App\Http\Requests\PassportUpdateRequest;
 
 class PassportController extends Controller
 {
@@ -41,8 +42,17 @@ class PassportController extends Controller
      * 
      * Store a newly created resource in storage.
      */
-    public function store(PassportCreateRequest $request)
+    public function store(PassportStoreRequest $request)
     {
+        if(Auth::check()){
+            $passport = Passport::where('user_id', Auth::id())->first();
+            if ($passport) {
+                return redirect()->route('passport.index')->with('error', 'Passport already exists.');
+            }
+        } else {
+            return redirect()->route('passport.create')->with('error', 'Please login to create a passport.');
+        }
+        $validated = $request->validated();
         Passport::create([
         
             'passport_number' => $request->passport_number,
