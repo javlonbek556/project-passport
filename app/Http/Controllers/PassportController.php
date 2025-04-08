@@ -2,19 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use Auth;
-use App\Models\Post;
+use App\Http\Requests\PassportUpdateRequest;
+use App\Models\Passport;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\PassportCreateRequest;
 
 class PassportController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    
     public function index()
     {
-        $passport = auth()->user()->passport;
-        return view('passport.index', compact('passport'));
+            
+        
+        
+        $passport = Auth::user()->passport; 
+
+        
+        
+        
+        return view("passport_crud.index",compact("passport"));
     }
 
     /**
@@ -22,32 +33,42 @@ class PassportController extends Controller
      */
     public function create()
     {
-        return view('passport.create');
+     return view('passport_crud.create');   
     }
 
     /**
+     * 
+     * 
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(PassportCreateRequest $request)
     {
-        Post::create([
-            'name'=> $request->name,
-            'email'=> $request->email,
-            'password'=> bcrypt($request->password),
+        Passport::create([
+        
+            'passport_number' => $request->passport_number,
+        
+            'issue_date' => $request->issue_date,
+        
+            'expiry_date' => $request->expiry_date,
+        
+            'user_id' => Auth::id(), 
         ]);
-        return redirect ('password.index')->with('success','qoshildi');
+    
+        return redirect()->route('passport.index');
     }
-
+    
     /**
      * Display the specified resource.
      */
     public function show(string $id)
     {
-        $post = Post::findOrFail($id);
-        if(Auth::user()->id != $post->user_id){
-            return redirect()->back()->with('error','Sizda ruxsat yo\'q');
-        }
-        return view('passport.show', compact('post'));
+        
+        
+        
+        $passport = Auth::user()->passport; 
+
+    return view
+        ('passport_crud.passport', compact('passport'));
     }
 
     /**
@@ -55,34 +76,48 @@ class PassportController extends Controller
      */
     public function edit(string $id)
     {
-        $post = Post::find($id);
-        if(Auth::user()->id != $post->user_id){
-            return redirect()->back()->with('error','Sizda ruxsat yo\'q');
-        }
-        
-       
-        return view('', compact('post'));
+        $passport = Passport::findOrFail($id);
+
+    
+        if (Auth::id() !== $passport->user_id) {
+        return redirect()->route('passport.index');
+    }
+
+    return view('passport_crud.edit', compact('passport'));
     }
 
     /**
      * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+     */ 
+    public function update(PassportUpdateRequest $request, string $id)
     {
-        Post::findOrFail($id)->update([
-'passport_number'=> $request->passport_number,
-            'issue_date'=> $request->issue_date,
-            'expiry_date'=> $request->expiry_date,  
-        ]);
+
+        $passport = Passport::findOrFail($id);  
+
+    $passport->update([
+     
+        'passport_number' => $request->passport_number,
+        'issue_date' => $request->issue_date,
+        'expiry_date' => $request->expiry_date,
+    ]);
+
+
+        return redirect()->route('passport.index');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        Post::findOrFail($id)->delete();
+    public function destroy(Passport $passport)
+{
 
-        return redirect()->back()->with('success','o\'chirildi');
-    }
+
+    $passport->delete();
+
+    return redirect()->route('passport.index');
+}
+
+
+
+    
 }

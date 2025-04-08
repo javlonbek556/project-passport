@@ -4,40 +4,51 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Auth\Events\Login;
-use App\Http\Requests\LoginUserRequest;
-use App\Http\Controllers\UserRegisterRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\UserLoginRequest;
+use App\Http\Requests\PostController;
+use App\Http\Requests\UserRegisterRequest;
+
 
 class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+
+     
     public function index()
     {
-        return view('passport.login');
+
+        return view("auth.login");
     }
-    public function login(LoginUserRequest $request)
+    public function login(UserLoginRequest $request)
     {
-       
-
-        $credentials = $request->only('email', 'password');
-
-        if (auth()->attempt($credentials)) {
-            return redirect()->intended('dashboard')->with('success', 'You are logged in!');
+        $user = User::where('email', $request->email)->first();
+    
+        if ($user) {
+            if (Hash::check($request->password, $user->password)) {
+                
+                Auth::login($user);
+                return redirect()->route('passport.index');
+            } else {
+                
+                return back()->withErrors(['email' => 'Noto‘g‘ri parol.']);
+            }
+        } else {
+            return 
+            back()->withErrors(['email' => 'Bunday email mavjud emas.']);
         }
-
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ])->compact('credentials');
     }
-
+    
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-        return view('passport.register');
+    
+        return view("auth.register");
     }
 
     /**
@@ -45,25 +56,43 @@ class UserController extends Controller
      */
     public function store(UserRegisterRequest $request)
     {
+        $validated = $request->validated();
+        
+        
+        
+        
+        $validated['password'] = bcrypt($validated['password']);
+        
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
+            
+            'username' => $validated['username'],
+            'email' => $validated['email'],
+            'password' => $validated['password'],
         ]);
-
-        auth()->login($user);
-
-        return redirect()->route('pa')->with('success', 'Registration successful and you are logged in!');
+        
+        Auth::login($user);
+        return redirect()->route("passport.index");
     }
-    public function logout()
-    {
-        auth()->logout();
-        return redirect('/')->with('success', 'You have been logged out!');
-    }
+    
 
     /**
      * Display the specified resource.
      */
+
+     public function logout(Request $request)
+     {
+         Auth::logout(); 
+         
+         
+         $request->session()->invalidate(); 
+         
+         $request->session()->regenerateToken(); 
+     
+         return redirect()->route('users.index'); 
+     }
+     
+
+
     public function show(string $id)
     {
         //
@@ -82,6 +111,7 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        
         //
     }
 
