@@ -93,6 +93,9 @@ class PassportController extends Controller
     {
 
         $passport = Passport::findOrFail($id);  
+        if(!Auth::id() === $passport->user_id) {
+            return redirect()->route('passport.index');
+        }
 
     $passport->update([
      
@@ -111,7 +114,9 @@ class PassportController extends Controller
     public function destroy(Passport $passport)
 {
 
-
+if (Auth::id() !== $passport->user_id) {
+        return redirect()->route('passport.index');
+    }
     $passport->delete();
 
     return redirect()->route('passport.index');
