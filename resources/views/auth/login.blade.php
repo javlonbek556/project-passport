@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.auth')
 @section('content')
 @section('title', 'Login')
     <div class="auth-container">
@@ -15,7 +15,7 @@
             </div>
             <button type="submit" class="btn btn-primary w-100">Kirish</button>
         </form>
-        <p class="mt-3 text-center">Hisobingiz yo'qmi? <a href="{{route('passport.create')}}">Ro'yxatdan o'tish</a></p>
+        <p class="mt-3 text-center">Hisobingiz yo'qmi? <a href="{{route('users.create')}}">Ro'yxatdan o'tish</a></p>
     </div>
     @if ($errors->any())
     <div class="alert alert-danger">
