@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('posts', function (Blueprint $table) {
+        Schema::create('passports', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->OnDelete('cascade');
-            $table->integer('passport_number')->unique();
-            $table->integer('issue_date')->nullable();
-            
-            $table->integer('expiry_date')->nullable();
+            $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete();
+            $table->string('passport_number')->unique();
+            $table->date('issue_date');
+            $table->date('expiry_date');
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('posts');
+        Schema::dropIfExists('passports');
     }
 };
